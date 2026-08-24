@@ -27,7 +27,7 @@ class DataProcessor(ABC):
 
 class NumericProcessor(DataProcessor):
     def validate(self, data: Any) -> bool:
-        if isinstance(data, (int, float) and not isinstance(data, bool)):
+        if isinstance(data, (int, float)) and not isinstance(data, bool):
             return True
         if isinstance(data, list):
             return all(isinstance(item, (int, float))
@@ -47,9 +47,9 @@ class NumericProcessor(DataProcessor):
 
 class TextProcessor(DataProcessor):
     def validate(self, data: Any) -> bool:
-        if isinstance(data, str) and data:
+        if isinstance(data, str):
             return True
-        if isinstance(data, list) and data:
+        if isinstance(data, list):
             return all(isinstance(item, str) for item in data)
         return False
 
@@ -71,10 +71,10 @@ class LogProcessor(DataProcessor):
                 for k, v in log.items()
             )
 
-        if isinstance(data, dict) and data:
+        if isinstance(data, dict):
             return is_valid_log(data)
 
-        if isinstance(data, list) and data:
+        if isinstance(data, list):
             return all(is_valid_log(log) for log in data)
 
         return False

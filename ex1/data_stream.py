@@ -4,8 +4,8 @@ from typing import Any
 
 class DataProcessor(ABC):
     def __init__(self):
-        self.storage = []
-        self.output_rank = 0
+        self._storage = []
+        self._output_rank = 0
 
     @abstractmethod
     def validate(self, data: Any) -> bool:
@@ -16,22 +16,23 @@ class DataProcessor(ABC):
         pass
 
     def output(self) -> tuple[int, str]:
-        if not self.storage:
+        if not self._storage:
             raise IndexError("No data available")
 
-        value: str = self.storage.pop(0)
-        rank: int = self.output_rank
-        self.output_rank += 1
+        value: str = self._storage.pop(0)
+        rank: int = self._output_rank
+        self._output_rank += 1
         return (rank, value)
 
 
 class NumericProcessor(DataProcessor):
     def validate(self, data: Any) -> bool:
-        if isinstance(data, (int, float)):
-            return True
-        if isinstance(data, list):
-            return all(isinstance(item, (int, float)) for item in data)
-        return False
+            if isinstance(data, (int, float)) and not isinstance(data, bool):
+                return True
+            if isinstance(data, list):
+                return all(isinstance(item, (int, float))
+                           and not isinstance(item, bool) for item in data)
+            return False
 
     def ingest(self, data: int | float | list[int] |
                list[float] | list[int | float]) -> None:
@@ -39,9 +40,9 @@ class NumericProcessor(DataProcessor):
             raise TypeError("Improper numeric data")
         if isinstance(data, list):
             for item in data:
-                self.storage.append(str(item))
+                self._storage.append(str(item))
         else:
-            self.storage.append(str(data))
+            self._storage.append(str(data))
 
 
 class TextProcessor(DataProcessor):
@@ -57,9 +58,9 @@ class TextProcessor(DataProcessor):
             raise TypeError("Improper text data")
         if isinstance(data, list):
             for item in data:
-                self.storage.append(item)
+                self._storage.append(item)
         else:
-            self.storage.append(data)
+            self._storage.append(data)
 
 
 class LogProcessor(DataProcessor):
@@ -87,11 +88,11 @@ class LogProcessor(DataProcessor):
             for log in data:
                 level = log.get("log_level", "")
                 message = log.get("log_message", "")
-                self.storage.append(f"{level}: {message}")
+                self._storage.append(f"{level}: {message}")
         else:
             level = data.get("log_level", "")
             message = data.get("log_message", "")
-            self.storage.append(f"{level}: {message}")
+            self._storage.append(f"{level}: {message}")
 
 
 class DataStream:
@@ -134,7 +135,7 @@ class DataStream:
         for proc in self.processors:
             name = proc.__class__.__name__.replace("Processor", " Processor")
             total = self.processed_counts[proc]
-            remaining = len(proc.storage)
+            remaining = len(proc._storage)
 
             print(
                 f"{name}: total {total} items processed,"
