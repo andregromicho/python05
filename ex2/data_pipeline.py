@@ -47,12 +47,12 @@ class DataProcessor(ABC):
 
 class NumericProcessor(DataProcessor):
     def validate(self, data: Any) -> bool:
-                if isinstance(data, (int, float)) and not isinstance(data, bool):
-                    return True
-                if isinstance(data, list):
-                    return all(isinstance(item, (int, float))
-                               and not isinstance(item, bool) for item in data)
-                return False
+        if isinstance(data, (int, float)) and not isinstance(data, bool):
+            return True
+        if isinstance(data, list):
+            return all(isinstance(item, (int, float))
+                       and not isinstance(item, bool) for item in data)
+        return False
 
     def ingest(self, data: int | float | list[int] |
                list[float] | list[int | float]) -> None:
@@ -85,19 +85,15 @@ class TextProcessor(DataProcessor):
 
 class LogProcessor(DataProcessor):
     def validate(self, data: Any) -> bool:
+        def is_valid_log(log: Any) -> bool:
+            return isinstance(log, dict) and all(
+                isinstance(k, str) and isinstance(v, str)
+                for k, v in log.items()
+            )
         if isinstance(data, dict):
-            return all(
-                isinstance(key, str) and isinstance(value, str)
-                for key, value in data.items()
-            )
-
+            return is_valid_log(data)
         if isinstance(data, list):
-            return all(
-                isinstance(log, dict) and
-                all(isinstance(key, str) and isinstance(value, str)
-                    for key, value in log.items())
-                for log in data
-            )
+            return all(is_valid_log(log) for log in data)
         return False
 
     def ingest(self, data: dict[str, str] | list[dict[str, str]]) -> None:

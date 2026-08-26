@@ -70,13 +70,10 @@ class LogProcessor(DataProcessor):
                 isinstance(k, str) and isinstance(v, str)
                 for k, v in log.items()
             )
-
         if isinstance(data, dict):
             return is_valid_log(data)
-
         if isinstance(data, list):
             return all(is_valid_log(log) for log in data)
-
         return False
 
     def ingest(self, data: dict[str, str] | list[dict[str, str]]) -> None:
