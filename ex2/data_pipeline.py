@@ -23,9 +23,9 @@ class JSONExportPlugin:
 
 
 class DataProcessor(ABC):
-    def __init__(self):
-        self._storage = []
-        self._output_rank = 0
+    def __init__(self) -> None:
+        self._storage: list[str] = []
+        self._output_rank: int = 0
 
     @abstractmethod
     def validate(self, data: Any) -> bool:
